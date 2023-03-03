@@ -2,7 +2,7 @@
 import cx_Oracle
 
 try:
-        conn = cx_Oracle.connect(user='mario', password='mario', dsn='localhost')
+        conn = cx_Oracle.connect(user='username', password='password', dsn='hostname:port/service_name')
 except cx_Oracle.connect.Error as err:
         print(f"Error al conectarse a la base de datos: {err}")
         exit()
@@ -11,7 +11,7 @@ except cx_Oracle.connect.Error as err:
 cursor = conn.cursor()
 
 def listar_jugadores():
-    
+
     query = """
             SELECT nombre_entrenador, COUNT(*) AS total_jugadores
             FROM Entrenador JOIN Jugador ON Entrenador.nlicencia = Jugador.nlicencia
@@ -20,6 +20,8 @@ def listar_jugadores():
 
     try:
         cursor.execute(query)
+        for (nombre_entrenador, total_jugadores) in cursor:
+            print(nombre_entrenador, total_jugadores)
     except cx_Oracle.connect.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
@@ -27,92 +29,99 @@ def listar_jugadores():
         exit()
 
 
-    
-    for (nombre_entrenador, total_jugadores) in cursor:
-        print(nombre_entrenador, total_jugadores)
 
 def buscar_jugadores_entrenador(nombre_entrenador):
-    
+
     query = """
             SELECT id_jugador, nombre_entrenador
             FROM Entrenador JOIN Jugador ON Entrenador.nlicencia = Jugador.nlicencia
             WHERE nombre_entrenador = :nombre_entrenador
             """
 
-    
+
     try:
         cursor.execute(query, nombre_entrenador=nombre_entrenador)
+        for (id_jugador, nombre_entrenador) in cursor:
+            print(id_jugador, nombre_entrenador)
     except cx_Oracle.connect.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         conn.close()
         exit()
 
-   
-    for (id_jugador, nombre_entrenador) in cursor:
-        print(id_jugador, nombre_entrenador)
+
 
 def mostrar_entrenador_jugadores():
-    
+
     nombre_entrenador = input("Introduce el nombre del entrenador: ")
 
-    
+
     query = """
             SELECT *
             FROM Entrenador JOIN Jugador ON Entrenador.nlicencia = Jugador.nlicencia
             WHERE nombre_entrenador = :nombre_entrenador
             """
 
-   
+
     try:
         cursor.execute(query, nombre_entrenador=nombre_entrenador)
+        for (nlicencia, nombre_entrenador, email, id_jugador, posicion_ant_camp, coef_elo, altura) in cursor:
+            print("Entrenador: ", nlicencia, nombre_entrenador, email)
+            print("Jugador: ", id_jugador, posicion_ant_camp, coef_elo, altura)
     except cx_Oracle.connect.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         conn.close()
         exit()
 
-   
-    for (nlicencia, nombre_entrenador, email, id_jugador, posicion_ant_camp, coef_elo, altura) in cursor:
-        print("Entrenador: ", nlicencia, nombre_entrenador, email)
-        print("Jugador: ", id_jugador, posicion_ant_camp, coef_elo, altura)
-
-def insertar_jugador(id_jugador, nlicencia, posicion_ant_camp, coef_elo, altura):
-    
+def insertar_jugador(jugadores):
     query = """
-            INSERT INTO Jugador (id_jugador, nlicencia, posicion_ant_camp, coef_elo, altura)
-            VALUES (:id_jugador, :nlicencia, :posicion_ant_camp, :coef_elo, :altura)
-            """
-
-    
-    cursor.execute(query, id_jugador=id_jugador, nlicencia=nlicencia, posicion_ant_camp=posicion_ant_camp, coef_elo=coef_elo, altura=altura)
+        INSERT INTO Jugador (id_jugador, nlicencia, posicion_ant_camp, coef_elo, altura)
+        VALUES (%s, %s, %s, %s, %s);
+    """
     try:
-        cursor.execute(query, id_jugador=id_jugador, nlicencia=nlicencia, posicion_ant_camp=posicion_ant_camp, coef_elo=coef_elo, altura=altura)
+        cursor = conn.cursor()
+        for jugador in jugadores:
+            cursor.execute(query, jugador)
+        conn.commit()
+        cursor.close()
+        print(f"Se han insertado {len(jugadores)} jugadores.")
     except cx_Oracle.connect.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         conn.close()
         exit()
+
+
+    
     
     conn.commit()
 
 def eliminar_jugadores_entrenador(nombre_entrenador):
-  
-   query = """
-      DELETE FROM Jugador
-      WHERE nlicencia IN (SELECT nlicencia FROM Entrenador WHERE nombre_entrenador = :nombre_entrenador)
-      """
-   try:
-        cursor.execute(query, nombre_entrenador=nombre_entrenador)
-   except cx_Oracle.connect.Error as err:
+    query = """
+        DELETE FROM Jugador
+        WHERE nlicencia IN (
+            SELECT nlicencia
+            FROM Entrenador
+            WHERE nombre_entrenador = %s
+        );
+    """
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, (nombre_entrenador,))
+        num_jugadores_eliminados = cursor.rowcount
+        conn.commit()
+        cursor.close()
+        print(f"Se han eliminado {num_jugadores_eliminados} jugadores del entrenador {nombre_entrenador}.")
+    except cx_Oracle.connect.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         conn.close()
         exit()
 
-   
-   conn.commit()
-   
+    
+    conn.commit()
+
 def actualizar_jugador(id_jugador, altura, coef_elo):
     
     query = """
