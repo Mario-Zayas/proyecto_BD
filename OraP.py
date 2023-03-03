@@ -2,7 +2,7 @@
 import cx_Oracle
 
 try:
-        conn = cx_Oracle.connect(user='username', password='password', dsn='hostname:port/service_name')
+        conn = cx_Oracle.connect(user='mario', password='mario', dsn='localhost')
 except cx_Oracle.connect.Error as err:
         print(f"Error al conectarse a la base de datos: {err}")
         exit()
