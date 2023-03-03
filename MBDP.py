@@ -20,15 +20,14 @@ def listar_jugadores():
     
     try:
         cursor.execute(query)
+        for (nombre_entrenador, total_jugadores) in cursor:
+            print(nombre_entrenador, total_jugadores)
     except mysql.connector.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         cnx.close()
         exit()
 
-   
-    for (nombre_entrenador, total_jugadores) in cursor:
-        print(nombre_entrenador, total_jugadores)
 
 def buscar_jugadores_entrenador(nombre_entrenador):
     
@@ -41,14 +40,14 @@ def buscar_jugadores_entrenador(nombre_entrenador):
     
     try:
         cursor.execute(query, (nombre_entrenador,))
+        for (id_jugador, nombre_entrenador) in cursor:
+            print(id_jugador, nombre_entrenador)
     except mysql.connector.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         cnx.close()
         exit()
     
-    for (id_jugador, nombre_entrenador) in cursor:
-        print(id_jugador, nombre_entrenador)
 
 def mostrar_entrenador_jugadores():
     
@@ -64,6 +63,9 @@ def mostrar_entrenador_jugadores():
     
     try:
         cursor.execute(query, (nombre_entrenador,))
+        for (nlicencia, nombre_entrenador, email, id_jugador, posicion_ant_camp, coef_elo, altura) in cursor:
+            print("Entrenador: ", nlicencia, nombre_entrenador, email)
+            print("Jugador: ", id_jugador, posicion_ant_camp, coef_elo, altura)
     except mysql.connector.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
@@ -71,9 +73,6 @@ def mostrar_entrenador_jugadores():
         exit()
 
     
-    for (nlicencia, nombre_entrenador, email, id_jugador, posicion_ant_camp, coef_elo, altura) in cursor:
-        print("Entrenador: ", nlicencia, nombre_entrenador, email)
-        print("Jugador: ", id_jugador, posicion_ant_camp, coef_elo, altura)
 
 def insertar_jugador(jugadores):
     query = """
@@ -92,6 +91,7 @@ def insertar_jugador(jugadores):
         cursor.close()
         cnx.close()
         exit()
+
 
     
     
@@ -119,27 +119,23 @@ def eliminar_jugadores_entrenador(nombre_entrenador):
         cnx.close()
         exit()
 
+    
     cnx.commit()
 
-def actualizar_jugador(jugadores):
+def actualizar_jugador(id_jugador, altura, coef_elo):
+    
     query = """
-        UPDATE Jugador
-        SET altura= %s, coef_elo = %s 
-        WHERE id_jugador = %s;
-    """
+            UPDATE Jugador
+            SET altura= %s, coef_elo = %s 
+            WHERE id_jugador = %s;
+            """
     try:
-        cursor = cnx.cursor()
-        for jugador in jugadores:
-            cursor.execute(query, jugador)
-        cnx.commit()
-        cursor.close()
-        print(f"Se han actualizado {len(jugadores)} jugadores.")
+        cursor.execute(query, (altura, coef_elo, id_jugador))
     except mysql.connector.Error as err:
         print(f"Error al ejecutar la consulta: {err}")
         cursor.close()
         cnx.close()
         exit()
-
     
     cnx.commit()
 
