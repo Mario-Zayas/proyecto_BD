@@ -1,4 +1,5 @@
 from PSQLP import *
+db=Conectar_BD("localhost","usuario","usuario","ajedrez")
 opcion = menu()
 while opcion != 7:
     if opcion == 1:
