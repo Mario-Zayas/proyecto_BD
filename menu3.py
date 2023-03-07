@@ -1,31 +1,35 @@
 from PSQLP import *
-db=Conectar_BD("localhost","usuario","usuario","ajedrez")
+db=Conectar_BD("localhost","postgres","hola","Jota")
 opcion = menu()
 while opcion != 7:
-    if opcion == 1:
-        listar_jugadores()
-    elif opcion == 2:
-        nombre_entrenador = input("Ingrese el nombre del entrenador: ")
-        buscar_jugadores_entrenador(nombre_entrenador)
-    elif opcion == 3:
-        mostrar_entrenador_jugadores()
-    elif opcion == 4:
-        id_jugador = input("Ingrese el ID del jugador: ")
-        nlicencia = input("Ingrese la licencia del entrenador: ")
-        posicion_ant_camp = input("Ingrese la posición del jugador en el campeonato anterior: ")
-        coef_elo = input("Ingrese el coeficiente ELO del jugador: ")
-        altura = input("Ingrese la altura del jugador: ")
-        insertar_jugador(id_jugador, nlicencia, posicion_ant_camp, coef_elo, altura)
-    elif opcion == 5:
-        nombre_entrenador = input("Ingrese el nombre del entrenador: ")
-        eliminar_jugadores_entrenador(nombre_entrenador)
-    elif opcion == 6:
-        id_jugador = input("Ingrese el ID del jugador: ")
-        nueva_posicion = input("Ingrese la nueva posición del jugador: ")
-        nueva_altura = input("Ingrese la nueva altura del jugador: ")
-        actualizar_jugador(id_jugador, nueva_posicion, nueva_altura)
-    elif opcion == 7:
-        print("")
-    else:
-        print("Opción no válida, utilice una opción válida.")
     opcion = menu()
+    if opcion == 1:
+        listar_jugadores(db)
+    elif opcion == 2:
+        nombre_entrenador = input("Introduce el nombre del entrenador: ")
+        buscar_jugadores_entrenador(nombre_entrenador, db)
+    elif opcion == 3:
+        mostrar_entrenador_jugadores(db)
+    elif opcion == 4:
+        jugadores = []
+        num_jugadores = int(input("Introduce el número de jugadores a insertar: "))
+        for i in range(num_jugadores):
+            id_jugador = input("Introduce el ID del jugador: ")
+            nlicencia = input("Introduce el número de licencia del entrenador: ")
+            posicion_ant_camp = input("Introduce la posición anterior en el campeonato: ")
+            coef_elo = input("Introduce el coeficiente Elo: ")
+            altura = input("Introduce la altura: ")
+            jugadores.append((id_jugador, nlicencia, posicion_ant_camp, coef_elo, altura))
+        insertar_jugador(jugadores, db)
+    elif opcion == 5:
+        nombre_entrenador = input("Introduce el nombre del entrenador: ")
+        eliminar_jugadores_entrenador(nombre_entrenador, db)
+    elif opcion == 6:
+        id_jugador = input("Introduce el ID del jugador a actualizar: ")
+        altura = input("Introduce la nueva altura: ")
+        coef_elo = input("Introduce el nuevo coeficiente Elo: ")
+        actualizar_jugador(id_jugador, altura, coef_elo, db)
+    elif opcion == 7:
+        print("Saliendo del programa...")
+    else:
+        print("Opción inválida. Por favor, inténtelo de nuevo.")
